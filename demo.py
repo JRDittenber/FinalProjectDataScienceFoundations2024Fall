@@ -3,7 +3,7 @@ from Primary_Folder.exceptions import final_except
 import sys 
 
 try:
-    a = 1/"cat"
+    a = 1/0
 
 except Exception as e:
     logging.info(e)
