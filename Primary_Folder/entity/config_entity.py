@@ -3,7 +3,7 @@ from Primary_Folder.constants import *
 from dataclasses import dataclass
 from datetime import datetime
 
-TIMESTAMP: str = datetime.now().strftime("%m_%d_%Y_%H_%_M_%S")
+TIMESTAMP: str = datetime.now().strftime("%m_%d_%Y_%H_%M_%S")
 
 @dataclass 
 class TrainingPipelineConfig: 
@@ -48,7 +48,7 @@ class DataTransformationConfig:
 @dataclass 
 class ModelTrainerConfig: 
     model_trainer_dir: str = os.path.join(training_pipeline_config.artifact_dir, MODEL_TRAINER_DIR_NAME)
-    traind_model_file_path: str = os.path.join(model_trainer_dir, MODEL_TRAINER_TRAINED_DIR_NAME, MODEL_FILE_NAME)
+    trained_model_file_path: str = os.path.join(model_trainer_dir, MODEL_TRAINER_TRAINED_DIR_NAME, MODEL_FILE_NAME)
     expected_accuracy: float = MODEL_TRAINER_EXPECTED_SCORE
     model_config_path: str = MODEL_TRAINER_MODEL_CONFIG_FILE_PATH 
     

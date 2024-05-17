@@ -1,7 +1,7 @@
-from Primary_Folder.constants import *
+from Primary_Folder.pipeline.traning_pipeline import TrainPipeline
 
 
-print(DATABASE_NAME)
     
-
+pipeline = TrainPipeline()
+pipeline.run_pipeline()
 

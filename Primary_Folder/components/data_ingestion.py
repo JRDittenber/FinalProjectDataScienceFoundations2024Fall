@@ -88,7 +88,7 @@ class DataIngestion:
             
             logging.info("Got the data from database")
             
-            self.split_data_as_train_set(dataframe)
+            self.split_data_as_train_test(dataframe)
             
             logging.info("Performed the train and test split")
             
