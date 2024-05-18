@@ -15,7 +15,7 @@ class VisaData:
         """        
         """
         try:
-            self.mongo_db = MongoDB(database_name = DATABASE_NAME)
+            self.mongo_client = MongoDB(database_name = DATABASE_NAME)
         except Exception as e:
             raise final_except(e, sys)
     
@@ -24,7 +24,7 @@ class VisaData:
             """export collection and return pd.DataFrame
             """
             if database_name is None:
-                collection = self.mongo_client[database_name][collection_name]
+                collection = self.mongo_client.database[collection_name]
             else: 
                 collection = self.mongo_client[database_name][collection_name]
         

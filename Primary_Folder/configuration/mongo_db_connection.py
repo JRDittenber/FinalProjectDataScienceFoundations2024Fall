@@ -1,6 +1,6 @@
 import sys
 import pymongo 
-from pymongo import MongoClient
+
 
 from Primary_Folder.exceptions import final_except
 from Primary_Folder.logger import logging 
@@ -23,7 +23,7 @@ class MongoDB:
     def __init__(self, database_name=DATABASE_NAME) -> None:
         try:
             if MongoDB.client is None:
-                mongo_db_url = os.getenv('MONGODB_DB_URL')
+                mongo_db_url = os.getenv('MONGODB_URL')
                 if mongo_db_url is None:
                     raise Exception(f'Environment key: {MONGODB_URL} is required.')
                 MongoDB.client = pymongo.MongoClient(mongo_db_url)

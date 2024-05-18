@@ -84,7 +84,7 @@ class TrainPipeline:
 
 
 
-    def start_data_transformation(self, data_ingestion_artifact: DataIngestionArtifact, data_validation_artifact: Dat) -> DataTransformationArtifact:
+    def start_data_transformation(self, data_ingestion_artifact: DataIngestionArtifact, data_validation_artifact: DataValdiationArtifact) -> DataTransformationArtifact:
         """
         This method of TrainPipeline class is responsible for starting data transformation component
         """

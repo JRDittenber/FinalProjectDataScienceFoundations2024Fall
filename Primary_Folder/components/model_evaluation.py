@@ -90,7 +90,7 @@ class ModelEvaluation:
         except Exception as e:
             raise final_except(e, sys)
 
-    def initiate_model_evaluation(self) -> ModelEvaluationArtifact:
+    def initiate_model_evaluation(self) -> ModelEvalutationArtifact:
         """
         Method Name :   initiate_model_evaluation
         Description :   This function is used to initiate all steps of the model evaluation
@@ -102,7 +102,7 @@ class ModelEvaluation:
             evaluate_model_response = self.evaluate_model()
             s3_model_path = self.model_eval_config.S3_model_key_path
 
-            model_evaluation_artifact = ModelEvaluationArtifact(
+            model_evaluation_artifact = ModelEvalutationArtifact(
                 is_model_accepted=evaluate_model_response.is_model_accepted,
                 s3_model_path=s3_model_path,
                 trained_model_path=self.model_trainer_artifact.trained_model_file_path,

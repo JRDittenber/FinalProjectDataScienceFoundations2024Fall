@@ -1,15 +1,17 @@
 import sys
 
 from Primary_Folder.cloud_storage.aws_storage import SimpleStorageService
+
 from Primary_Folder.exceptions import final_except
 from Primary_Folder.logger import logging
-from Primary_Folder.entity.artifact_entity import ModelPusherArtifact, ModelEvaluationArtifact
+
+from Primary_Folder.entity.artifact_entity import ModelPusherArtifact, ModelEvalutationArtifact
 from Primary_Folder.entity.config_entity import ModelPusherConfig
 from Primary_Folder.entity.s3_estimator import USvisaEstimator
 
 
 class ModelPusher:
-    def __init__(self, model_evaluation_artifact: ModelEvaluationArtifact,
+    def __init__(self, model_evaluation_artifact: ModelEvalutationArtifact,
                  model_pusher_config: ModelPusherConfig):
         """
         :param model_evaluation_artifact: Output reference of data evaluation artifact stage

@@ -85,7 +85,7 @@ class DataValidation:
             report = data_drift_profile.json()
             json_report = json.loads(report) 
             
-            write_yaml_file(file_path=self.data_validation_config.drift_report_file_path, report=json_report, content = json_report)
+            write_yaml_file(file_path=self.data_validation_config.drift_report_file_path, content = json_report)
             
             n_features = json_report["data_drift"]["data"]["metrics"]["n_features"]
             n_drifted_features = json_report["data_drift"]["data"]["metrics"]["dataset_drift"]
@@ -107,8 +107,8 @@ class DataValidation:
         try:
             validation_error_msg = ""
             logging.info("Entered the initiate data validation method of Data Validation Class")
-            train_df, test_df = (DataValidation.read_data(file_path=self.data_ingestion_artifact_path.trained_file_path),
-                                 DataValidation.read_data(file_path=self.data_ingestion_artifact_path.test_file_path))
+            train_df, test_df = (DataValidation.read_data(file_path=self.data_ingestion_artifact.trained_file_path),
+                                 DataValidation.read_data(file_path=self.data_ingestion_artifact.test_file_path))
             
             status = self.validate_number_of_columns(dataframe = train_df)
             logging.info(f'All required columns present in training data {status}')
