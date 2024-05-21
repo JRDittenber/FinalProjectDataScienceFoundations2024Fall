@@ -1,63 +1,57 @@
-name: Deploy Application Docker Image to EC2 instance  # The name of the workflow
+name: Deploy Application Docker Image to EC2 instance
 
-on:  # Specifies the event that triggers the workflow
+on:
   push:
-    branches: [main]  # The workflow runs when there's a push to the 'main' branch
+    branches: [main]
 
-jobs:  # Defines the jobs that will run as part of the workflow
-  Continuous-Integration:  # The name of the first job
-    runs-on: ubuntu-latest  # The job will run on the latest version of Ubuntu
+jobs:
+  Continuous-Integration:
+    runs-on: ubuntu-latest
 
-    steps:  # The steps that make up the job
-      - name: Checkout  # The name of the first step
-        uses: actions/checkout@v2  # This step uses the 'checkout' action to clone the repository
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
 
-      - name: Configure AWS credentials  # The name of the second step
-        uses: aws-actions/configure-aws-credentials@v1  # This step uses the 'configure-aws-credentials' action
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}  # Provides the AWS access key ID from secrets
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}  # Provides the AWS secret access key from secrets
-          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}  # Provides the AWS region from secrets
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
 
-      - name: Login to Amazon ECR  # The name of the third step
-        id: login-ecr  # Sets an ID for this step to reference its outputs later
-        uses: aws-actions/amazon-ecr-login@v1  # This step uses the 'amazon-ecr-login' action to log in to Amazon ECR
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Build, tag, and push image to Amazon ECR  # The name of the fourth step
-        id: build-image  # Sets an ID for this step to reference its outputs later
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
         env:
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}  # Sets the ECR registry environment variable
-          ECR_REPOSITORY: ${{ secrets.ECR_REPO }}  # Sets the ECR repository environment variable
-          IMAGE_TAG: latest  # Sets the image tag to 'latest'
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: ${{ secrets.ECR_REPO }}
+          IMAGE_TAG: latest
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .  # Builds the Docker image
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG  # Pushes the Docker image to ECR
-          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"  # Sets the output image
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .  
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          echo "::set-output name=image::$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG"
 
-  Continuous-Deployment:  # The name of the second job
-    needs: Continuous-Integration  # Specifies that this job depends on the successful completion of the first job
-    runs-on: self-hosted  # The job will run on a self-hosted runner
+  Continuous-Deployment:
+    needs: Continuous-Integration
+    runs-on: self-hosted
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    steps:  # The steps that make up the job
-      - name: Checkout  # The name of the first step
-        uses: actions/checkout@v3  # This step uses the 'checkout' action to clone the repository
-
-      - name: Configure AWS credentials  # The name of the second step
-        uses: aws-actions/configure-aws-credentials@v1  # This step uses the 'configure-aws-credentials' action
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}  # Provides the AWS access key ID from secrets
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}  # Provides the AWS secret access key from secrets
-          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}  # Provides the AWS region from secrets
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_DEFAULT_REGION }}
 
-      - name: Login to Amazon ECR  # The name of the third step
-        id: login-ecr  # Sets an ID for this step to reference its outputs later
-        uses: aws-actions/amazon-ecr-login@v1  # This step uses the 'amazon-ecr-login' action to log in to Amazon ECR
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
 
-      - name: Run Docker Image to serve users  # The name of the fourth step
+      - name: Run Docker Image to serve users
         run: |
-          docker run -d -e AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" \  # Runs the Docker image in detached mode, passing necessary environment variables
-                        -e AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" \
-                        -e AWS_DEFAULT_REGION="${{ secrets.AWS_DEFAULT_REGION }}" \
-                        -e MONGODB_URL="${{ secrets.MONGODB_URL }}" \
-                        -p 8080:8080 "${{ steps.login-ecr.outputs.registry }}/\  # Maps port 8080 of the host to port 8080 of the container
-${{ secrets.ECR_REPO }}:latest"  # Uses the latest Docker image from the ECR repository
+         docker run -d -e AWS_ACCESS_KEY_ID="${{ secrets.AWS_ACCESS_KEY_ID }}" -e AWS_SECRET_ACCESS_KEY="${{ secrets.AWS_SECRET_ACCESS_KEY }}" -e AWS_DEFAULT_REGION="${{ secrets.AWS_DEFAULT_REGION }}" -e MONGODB_URL="${{ secrets.MONGODB_URL }}" -p 8080:8080 "${{ steps.login-ecr.outputs.registry }}"/"${{ secrets.ECR_REPO }}":latest
