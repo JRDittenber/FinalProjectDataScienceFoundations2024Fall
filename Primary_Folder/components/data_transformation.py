@@ -1,8 +1,6 @@
 import sys
-
 import numpy as np
 import pandas as pd
-
 from imblearn.combine import SMOTEENN
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import StandardScaler, OneHotEncoder, OrdinalEncoder, PowerTransformer
@@ -10,20 +8,30 @@ from sklearn.compose import ColumnTransformer
 
 from Primary_Folder.constants import TARGET_COLUMN, SCHEMA_FILE_PATH, CURRENT_YEAR
 from Primary_Folder.entity.config_entity import DataTransformationConfig
-from Primary_Folder.entity.artifact_entity import DataTransformationArtifact, DataIngestionArtifact, DataValdiationArtifact
-
+from Primary_Folder.entity.artifact_entity import (
+    DataTransformationArtifact, 
+    DataIngestionArtifact, 
+    DataValdiationArtifact
+)
 from Primary_Folder.exceptions import final_except
 from Primary_Folder.logger import logging
-
-from Primary_Folder.utils.main import save_object, save_numpy_array_data, read_yaml_file, drop_columns
+from Primary_Folder.utils.main import (
+    save_object, 
+    save_numpy_array_data, 
+    read_yaml_file, 
+    drop_columns
+)
 from Primary_Folder.entity.estimator import TargetValueMapping
 
+
 class DataTransformation:
-    def __init__(self, data_ingestion_artifact: DataIngestionArtifact,
+    def __init__(self, 
+                 data_ingestion_artifact: DataIngestionArtifact,
                  data_transformation_config: DataTransformationConfig,
-                 data_validation_artifact: DataTransformationArtifact):
-        """Output is the data ingestion artifact and configuration of
-        data transformation
+                 data_validation_artifact: DataValdiationArtifact):
+        """
+        Initialize DataTransformation with data ingestion artifact, 
+        data transformation configuration, and data validation artifact.
         """
         try:
             self.data_ingestion_artifact = data_ingestion_artifact
@@ -35,6 +43,15 @@ class DataTransformation:
 
     @staticmethod
     def read_data(file_path) -> pd.DataFrame:
+        """
+        Read data from a CSV file.
+
+        Args:
+            file_path (str): Path to the CSV file.
+
+        Returns:
+            pd.DataFrame: DataFrame containing the data.
+        """
         try:
             return pd.read_csv(file_path)
         except Exception as e:
@@ -42,7 +59,10 @@ class DataTransformation:
 
     def get_data_transformer_object(self) -> Pipeline:
         """
-        Creates and returns a data transformer object for the data
+        Create and return a data transformer object.
+
+        Returns:
+            Pipeline: Preprocessing pipeline.
         """
         try:
             logging.info("Got numerical cols from schema config")
@@ -53,7 +73,7 @@ class DataTransformation:
 
             logging.info("Initialized StandardScaler, OneHotEncoder, Ordinal Encoder")
 
-            nominal_columns = self.schema_config['nominal columns']
+            nominal_columns = self.schema_config['nominal_columns']
             ordinal_columns = self.schema_config['ordinal_columns']
             transform_columns = self.schema_config['transform_columns']
             num_features = self.schema_config['num_features']
@@ -77,13 +97,16 @@ class DataTransformation:
 
             return preprocessor
 
-        except Exception as e:
-            raise final_except(e, sys)
+        except KeyError as e:
+            raise final_except(e, sys) from e 
 
     def initiate_data_transformation(self) -> DataTransformationArtifact:
         """
-        Initiates data transformation component of the pipeline
-        Returns a transformed preprocessor object
+        Initiate data transformation component of the pipeline.
+
+        Returns:
+            DataTransformationArtifact: Artifact containing paths to 
+            transformed training and testing data.
         """
         try:
             if self.data_validation_artifact.validation_status:
@@ -173,4 +196,4 @@ class DataTransformation:
                 raise Exception(self.data_validation_artifact.message)
 
         except Exception as e:
-            raise final_except(e, sys)
+            raise final_except(e, sys) from e 

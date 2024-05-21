@@ -1,16 +1,22 @@
-from Primary_Folder.entity.config_entity import ModelEvaluationConfig
-from Primary_Folder.entity.artifact_entity import ModelTrainerArtifact, DataIngestionArtifact, ModelEvalutationArtifact
-from sklearn.metrics import f1_score
-from Primary_Folder.exceptions import final_except
-from Primary_Folder.constants import TARGET_COLUMN, CURRENT_YEAR
-from Primary_Folder.logger import logging
 import sys
-import pandas as pd
-from typing import Optional
-from Primary_Folder.entity.s3_estimator import USvisaEstimator
 from dataclasses import dataclass
-from Primary_Folder.entity.estimator import  USVisaModel
-from Primary_Folder.entity.estimator import TargetValueMapping
+from typing import Optional
+
+import pandas as pd
+from sklearn.metrics import f1_score
+
+from Primary_Folder.constants import TARGET_COLUMN, CURRENT_YEAR
+from Primary_Folder.entity.artifact_entity import (
+    DataIngestionArtifact, 
+    ModelEvalutationArtifact, 
+    ModelTrainerArtifact
+)
+from Primary_Folder.entity.config_entity import ModelEvaluationConfig
+from Primary_Folder.entity.estimator import TargetValueMapping, USVisaModel
+from Primary_Folder.entity.s3_estimator import USvisaEstimator
+from Primary_Folder.exceptions import final_except
+from Primary_Folder.logger import logging
+
 
 @dataclass
 class EvaluateModelResponse:
@@ -33,57 +39,51 @@ class ModelEvaluation:
 
     def get_best_model(self) -> Optional[USvisaEstimator]:
         """
-        Method Name :   get_best_model
-        Description :   This function is used to get model in production
+        Get the best model currently in production, if available.
         
-        Output      :   Returns model object if available in s3 storage
-        On Failure  :   Write an exception log and then raise an exception
+        Returns:
+            USvisaEstimator: The best model in production, or None if no model is found.
         """
         try:
             bucket_name = self.model_eval_config.bucket_name
-            model_path=self.model_eval_config.S3_model_key_path
-            usvisa_estimator = USvisaEstimator(bucket_name=bucket_name,
-                                               model_path=model_path)
+            model_path = self.model_eval_config.S3_model_key_path
+            usvisa_estimator = USvisaEstimator(bucket_name=bucket_name, model_path=model_path)
 
             if usvisa_estimator.is_model_present(model_path=model_path):
                 return usvisa_estimator
             return None
         except Exception as e:
-            raise  final_except(e,sys)
+            raise final_except(e, sys)
 
     def evaluate_model(self) -> EvaluateModelResponse:
         """
-        Method Name :   evaluate_model
-        Description :   This function is used to evaluate trained model 
-                        with production model and choose best model 
+        Evaluate the trained model against the best production model and choose the best one.
         
-        Output      :   Returns bool value based on validation results
-        On Failure  :   Write an exception log and then raise an exception
+        Returns:
+            EvaluateModelResponse: The evaluation result including f1 scores and acceptance status.
         """
         try:
             test_df = pd.read_csv(self.data_ingestion_artifact.test_file_path)
-            test_df['company_age'] = CURRENT_YEAR-test_df['yr_of_estab']
+            test_df['company_age'] = CURRENT_YEAR - test_df['yr_of_estab']
 
             x, y = test_df.drop(TARGET_COLUMN, axis=1), test_df[TARGET_COLUMN]
-            y = y.replace(
-                TargetValueMapping()._asdict()
-            )
+            y = y.replace(TargetValueMapping()._asdict())
 
-            # trained_model = load_object(file_path=self.model_trainer_artifact.trained_model_file_path)
             trained_model_f1_score = self.model_trainer_artifact.metric_artifact.f1_score
 
-            best_model_f1_score=None
+            best_model_f1_score = None
             best_model = self.get_best_model()
             if best_model is not None:
                 y_hat_best_model = best_model.predict(x)
                 best_model_f1_score = f1_score(y, y_hat_best_model)
-            
+
             tmp_best_model_score = 0 if best_model_f1_score is None else best_model_f1_score
-            result = EvaluateModelResponse(trained_model_f1_score=trained_model_f1_score,
-                                           best_model_f1_score=best_model_f1_score,
-                                           is_model_accepted=trained_model_f1_score > tmp_best_model_score,
-                                           difference=trained_model_f1_score - tmp_best_model_score
-                                           )
+            result = EvaluateModelResponse(
+                trained_model_f1_score=trained_model_f1_score,
+                best_model_f1_score=best_model_f1_score,
+                is_model_accepted=trained_model_f1_score > tmp_best_model_score,
+                difference=trained_model_f1_score - tmp_best_model_score
+            )
             logging.info(f"Result: {result}")
             return result
 
@@ -92,12 +92,11 @@ class ModelEvaluation:
 
     def initiate_model_evaluation(self) -> ModelEvalutationArtifact:
         """
-        Method Name :   initiate_model_evaluation
-        Description :   This function is used to initiate all steps of the model evaluation
+        Initiate all steps of the model evaluation process.
         
-        Output      :   Returns model evaluation artifact
-        On Failure  :   Write an exception log and then raise an exception
-        """  
+        Returns:
+            ModelEvalutationArtifact: The model evaluation artifact with the evaluation results.
+        """
         try:
             evaluate_model_response = self.evaluate_model()
             s3_model_path = self.model_eval_config.S3_model_key_path
@@ -106,7 +105,8 @@ class ModelEvaluation:
                 is_model_accepted=evaluate_model_response.is_model_accepted,
                 s3_model_path=s3_model_path,
                 trained_model_path=self.model_trainer_artifact.trained_model_file_path,
-                changed_accuracy=evaluate_model_response.difference)
+                changed_accuracy=evaluate_model_response.difference
+            )
 
             logging.info(f"Model evaluation artifact: {model_evaluation_artifact}")
             return model_evaluation_artifact

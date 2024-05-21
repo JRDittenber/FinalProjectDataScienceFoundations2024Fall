@@ -1,8 +1,10 @@
 import sys
 from pandas import DataFrame
+
 from Primary_Folder.cloud_storage.aws_storage import SimpleStorageService
 from Primary_Folder.exceptions import final_except
 from Primary_Folder.entity.estimator import USVisaModel
+
 
 class USvisaEstimator:
     """
@@ -13,8 +15,9 @@ class USvisaEstimator:
         """
         Initialize the USvisaEstimator with the bucket name and model path.
 
-        :param bucket_name: Name of your S3 bucket.
-        :param model_path: Location of your model in the bucket.
+        Args:
+            bucket_name (str): Name of your S3 bucket.
+            model_path (str): Location of your model in the bucket.
         """
         self.bucket_name = bucket_name
         self.s3 = SimpleStorageService()
@@ -25,8 +28,11 @@ class USvisaEstimator:
         """
         Check if the model is present in the specified path in the S3 bucket.
 
-        :param model_path: Path of the model in the S3 bucket.
-        :return: True if the model is present, False otherwise.
+        Args:
+            model_path (str): Path of the model in the S3 bucket.
+
+        Returns:
+            bool: True if the model is present, False otherwise.
         """
         try:
             return self.s3.s3_key_path_available(bucket_name=self.bucket_name, s3_key=model_path)
@@ -38,7 +44,8 @@ class USvisaEstimator:
         """
         Load the model from the specified path in the S3 bucket.
 
-        :return: The loaded USvisaModel.
+        Returns:
+            USVisaModel: The loaded USVisaModel.
         """
         try:
             return self.s3.load_model(self.model_path, bucket_name=self.bucket_name)
@@ -49,9 +56,12 @@ class USvisaEstimator:
         """
         Save the model to the specified path in the S3 bucket.
 
-        :param from_file: Local path of the model file.
-        :param remove: If True, remove the model file locally after uploading. Default is False.
-        :return: None
+        Args:
+            from_file (str): Local path of the model file.
+            remove (bool): If True, remove the model file locally after uploading. Default is False.
+
+        Returns:
+            None
         """
         try:
             self.s3.upload_file(from_file, to_filename=self.model_path, bucket_name=self.bucket_name, remove=remove)
@@ -62,8 +72,11 @@ class USvisaEstimator:
         """
         Make predictions on the given DataFrame using the loaded model.
 
-        :param dataframe: Input data for predictions.
-        :return: Predictions as a DataFrame.
+        Args:
+            dataframe (DataFrame): Input data for predictions.
+
+        Returns:
+            DataFrame: Predictions as a DataFrame.
         """
         try:
             if self.loaded_model is None:

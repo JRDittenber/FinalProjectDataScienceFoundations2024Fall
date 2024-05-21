@@ -6,7 +6,7 @@ import pandas as pd
 from pandas import DataFrame
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import accuracy_score, f1_score, precision_score, recall_score
-from neuro_mf  import ModelFactory
+from neuro_mf import ModelFactory
 
 from Primary_Folder.exceptions import final_except
 from Primary_Folder.logger import logging
@@ -14,24 +14,32 @@ from Primary_Folder.utils.main import load_numpy_array_data, read_yaml_file, loa
 from Primary_Folder.entity.config_entity import ModelTrainerConfig
 from Primary_Folder.entity.artifact_entity import DataTransformationArtifact, ModelTrainerArtifact, ClassificationMetricArtifact
 from Primary_Folder.entity.estimator import USVisaModel
+from Primary_Folder.entity.estimator import TargetValueMapping
+
 
 class ModelTrainer:
     def __init__(self, data_transformation_artifact: DataTransformationArtifact,
                  model_trainer_config: ModelTrainerConfig):
         """
-        :param data_ingestion_artifact: Output reference of data ingestion artifact stage
-        :param data_transformation_config: Configuration for data transformation
+        Initialize ModelTrainer with data transformation artifact and model trainer configuration.
+
+        Args:
+            data_transformation_artifact (DataTransformationArtifact): Output reference of data transformation artifact stage.
+            model_trainer_config (ModelTrainerConfig): Configuration for model trainer.
         """
         self.data_transformation_artifact = data_transformation_artifact
         self.model_trainer_config = model_trainer_config
 
     def get_model_object_and_report(self, train: np.array, test: np.array) -> Tuple[object, object]:
         """
-        Method Name :   get_model_object_and_report
-        Description :   This function uses neuro_mf to get the best model object and report of the best model
+        Get the best model object and report using neuro_mf.
 
-        Output      :   Returns metric artifact object and best model object
-        On Failure  :   Write an exception log and then raise an exception
+        Args:
+            train (np.array): Training data.
+            test (np.array): Testing data.
+
+        Returns:
+            Tuple[object, object]: Metric artifact object and best model object.
         """
         try:
             logging.info("Using neuro_mf to get best model object and report")
@@ -39,8 +47,12 @@ class ModelTrainer:
 
             x_train, y_train, x_test, y_test = train[:, :-1], train[:, -1], test[:, :-1], test[:, -1]
 
+            # Convert y_train and y_test to numerical values
+            y_train = pd.Series(y_train).replace(TargetValueMapping()._asdict()).values
+            y_test = pd.Series(y_test).replace(TargetValueMapping()._asdict()).values
+
             best_model_detail = model_factory.get_best_model(
-                X=x_train,y=y_train,base_accuracy=self.model_trainer_config.expected_accuracy
+                X=x_train, y=y_train, base_accuracy=self.model_trainer_config.expected_accuracy
             )
             model_obj = best_model_detail.best_model
 
@@ -57,32 +69,33 @@ class ModelTrainer:
         except Exception as e:
             raise final_except(e, sys) from e
 
+    def initiate_model_trainer(self) -> ModelTrainerArtifact:
+        """
+        Initiate the model trainer process.
 
-    def initiate_model_trainer(self, ) -> ModelTrainerArtifact:
+        This function initiates all steps of the model trainer process and returns the model trainer artifact.
+
+        Returns:
+            ModelTrainerArtifact: The model trainer artifact with the training results.
+        """
         logging.info("Entered initiate_model_trainer method of ModelTrainer class")
-        """
-        Method Name :   initiate_model_trainer
-        Description :   This function initiates a model trainer steps
-
-        Output      :   Returns model trainer artifact
-        On Failure  :   Write an exception log and then raise an exception
-        """
         try:
             train_arr = load_numpy_array_data(file_path=self.data_transformation_artifact.transformed_train_file_path)
             test_arr = load_numpy_array_data(file_path=self.data_transformation_artifact.transformed_test_file_path)
 
-            best_model_detail ,metric_artifact = self.get_model_object_and_report(train=train_arr, test=test_arr)
+            best_model_detail, metric_artifact = self.get_model_object_and_report(train=train_arr, test=test_arr)
 
             preprocessing_obj = load_object(file_path=self.data_transformation_artifact.transformed_object_file_path)
-
 
             if best_model_detail.best_score < self.model_trainer_config.expected_accuracy:
                 logging.info("No best model found with score more than base score")
                 raise Exception("No best model found with score more than base score")
 
-            usvisa_model = USVisaModel(preprocessing_object=preprocessing_obj,
-                                       trained_model_object=best_model_detail.best_model)
-            logging.info("Created usvisa model object with preprocessor and model")
+            usvisa_model = USVisaModel(
+                preprocessing_object=preprocessing_obj,
+                trained_model_object=best_model_detail.best_model
+            )
+            logging.info("Created USVisa model object with preprocessor and model")
             logging.info("Created best model file path.")
             save_object(self.model_trainer_config.trained_model_file_path, usvisa_model)
 
