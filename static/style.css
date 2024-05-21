@@ -1,0 +1,94 @@
+/* Variables for repeated values */
+:root {
+    --primary-color: #00bcd4;
+    --secondary-color: rgba(0, 0, 0, 0.9);
+    --input-border-color: rgba(0, 0, 0, 0.5);
+    --font-color: #fff;
+    --font-size-large: 24px;
+    --font-size-medium: 18px;
+    --font-size-xlarge: 48px;
+    --input-height: 50px;
+}
+
+/* Navbar styles */
+.navbar-light .navbar-brand {
+    color: var(--secondary-color);
+    margin: 0 auto;
+}
+
+/* Global styles */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: sans-serif;
+}
+
+/* Form container */
+.formBox {
+    margin-top: 50px;
+    padding: 50px;
+}
+
+/* Heading styles */
+h1 {
+    margin: 0 0 50px 0 !important;
+    padding: 0;
+    text-align: center;
+    text-transform: uppercase;
+    font-size: var(--font-size-xlarge);
+}
+
+/* Input box */
+.inputBox {
+    position: relative;
+    box-sizing: border-box;
+    margin-bottom: 40px;
+}
+
+/* Button styles */
+.button, .btn_train {
+    width: 100%;
+    height: var(--input-height);
+    border-radius: 0;
+    border: none;
+    outline: none;
+    font-size: var(--font-size-large);
+    color: var(--font-color);
+}
+
+.button {
+    background: var(--primary-color);
+}
+
+.btn_train {
+    background: red;
+}
+
+/* Input styles */
+.input {
+    position: relative;
+    width: 100%;
+    height: var(--input-height);
+    background: transparent;
+    border: none;
+    outline: none;
+    font-size: var(--font-size-large);
+    border-bottom: 2px solid var(--input-border-color);
+}
+
+/* Input text styles */
+.inputText {
+    position: absolute;
+    line-height: var(--input-height);
+    font-size: var(--font-size-large);
+    transition: 0.5s;
+    opacity: 0.5;
+}
+
+/* Focused input text */
+.focus .inputText {
+    transform: translateY(-30px);
+    font-size: var(--font-size-medium);
+    opacity: 1;
+    color: var(--primary-color);
+}
