@@ -26,6 +26,12 @@ jobs:
       - name: List files for debugging
         run: ls -al
 
+      - name: Print environment variables for debugging
+        run: |
+          echo "ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}"
+          echo "ECR_REPOSITORY: ${{ secrets.ECR_REPOSITORY }}"
+          echo "IMAGE_TAG: latest"
+
       - name: Build, tag, and push image to Amazon ECR
         id: build-image
         env:
