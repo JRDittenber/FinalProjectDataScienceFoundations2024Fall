@@ -3,7 +3,7 @@ from datetime import date
 
 DATABASE_NAME = 'FinalProjectSP24'
 COLLECTION_NAME = 'VISA_DATA'
-MONGODB_URL = 'MONGO_URL'
+MONGO_URL = 'MONGO_URL'
 
 PIPELINE_NAME: str = 'finalproject'
 ARTIFACT_DIR: str = 'artifact'
@@ -19,9 +19,9 @@ TRAIN_FILE_NAME: str = 'train.csv'
 TEST_FILE_NAME: str = 'test.csv'
 SCHEMA_FILE_PATH = os.path.join("config", "schema.yaml")
 
-AWS_ACCESS_KEY_ID_ENV_KEY = "AWS_ACCESS_KEY_ID"
-AWS_SECRET_ACCESS_KEY_ID_ENV_KEY = 'AWS_SECRET_ACCESS_KEY'
-REGION_NAME = 'us-east-1'
+AWS_ACCESS_KEY_ID = "AWS_ACCESS_KEY_ID"
+AWS_SECRET_ACCESS_KEY = 'AWS_SECRET_ACCESS_KEY'
+AWS_DEFAULT_REGION = 'us-east-1'
 
 # Data ingestion related constants
 DATA_INGESTION_COLLECTION_NAME: str = 'VISA_DATA'

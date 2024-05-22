@@ -1,14 +1,13 @@
 import boto3
 import os
 
-from Primary_Folder.constants import AWS_SECRET_ACCESS_KEY_ID_ENV_KEY, AWS_ACCESS_KEY_ID_ENV_KEY, REGION_NAME
-
+from Primary_Folder.constants import AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_DEFAULT_REGION
 
 class S3Client:
     s3_client = None
     s3_resource = None
 
-    def __init__(self, region_name=REGION_NAME):
+    def __init__(self, region_name=AWS_DEFAULT_REGION):
         """
         Initialize S3Client with AWS credentials from environment variables.
 
@@ -17,13 +16,13 @@ class S3Client:
         variables are not set.
         """
         if S3Client.s3_resource is None or S3Client.s3_client is None:
-            access_key_id = os.getenv(AWS_ACCESS_KEY_ID_ENV_KEY)
-            secret_access_key = os.getenv(AWS_SECRET_ACCESS_KEY_ID_ENV_KEY)
+            access_key_id = os.getenv(AWS_ACCESS_KEY_ID)
+            secret_access_key = os.getenv(AWS_SECRET_ACCESS_KEY)
 
             if access_key_id is None:
-                raise Exception(f"Environment variable: {AWS_ACCESS_KEY_ID_ENV_KEY} is not set.")
+                raise Exception(f"Environment variable: {AWS_ACCESS_KEY_ID} is not set.")
             if secret_access_key is None:
-                raise Exception(f"Environment variable: {AWS_SECRET_ACCESS_KEY_ID_ENV_KEY} is not set.")
+                raise Exception(f"Environment variable: {AWS_SECRET_ACCESS_KEY} is not set.")
 
             S3Client.s3_resource = boto3.resource(
                 's3',
