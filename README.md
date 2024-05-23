@@ -120,6 +120,23 @@ Follow GitHub’s instructions to set up your EC2 instance as a self-hosted runn
 #### Register Runner
 Register the runner with your GitHub repository so that it can execute your CI/CD workflows. Continuous Integration (CI) and Continuous Deployment (CD) workflows automate the process of testing and deploying your code.
 
+
+### Open EC2 and Install 
+```bash
+sudo apt-get update -y
+
+sudo apt-get upgrade
+
+#required
+
+curl -fsSL https://get.docker.com -o get-docker.sh
+
+sudo sh get-docker.sh
+
+sudo usermod -aG docker ubuntu
+
+newgrp docker
+```
 ### 7. Setup GitHub Secrets
 
 #### Navigate to GitHub Repository Settings
