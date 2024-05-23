@@ -3,31 +3,30 @@ import sys
 
 import numpy as np
 import pandas as pd
-from pandas import DataFrame
-
 from Primary_Folder.entity.config_entity import VisaPredictorConfig
 from Primary_Folder.entity.s3_estimator import USvisaEstimator
-
 from Primary_Folder.exceptions import final_except
 from Primary_Folder.logger import logging
-
 from Primary_Folder.utils.main import read_yaml_file
+from pandas import DataFrame
 
 
 class USVisaData:
     def __init__(self,
-                 continent,
-                 education_of_employee,
-                 has_job_experience,
-                 requires_job_training,
-                 no_of_employees,
-                 region_of_employment,
-                 prevailing_wage,
-                 unit_of_wage,
-                 full_time_position,
-                 company_age):
+                continent,
+                education_of_employee,
+                has_job_experience,
+                requires_job_training,
+                no_of_employees,
+                region_of_employment,
+                prevailing_wage,
+                unit_of_wage,
+                full_time_position,
+                company_age
+                ):
         """
-        Initialize the USVisaData class with input data.
+        Usvisa Data constructor
+        Input: all features of the trained model for prediction
         """
         try:
             self.continent = continent
@@ -40,18 +39,30 @@ class USVisaData:
             self.unit_of_wage = unit_of_wage
             self.full_time_position = full_time_position
             self.company_age = company_age
+
+
         except Exception as e:
             raise final_except(e, sys) from e
 
-    def get_usvisa_input_dataframe(self) -> DataFrame:
+    def get_usvisa_input_dataframe(self)-> DataFrame:
         """
-        Convert the input data into a DataFrame.
-
-        Returns:
-            DataFrame: DataFrame containing the input data.
+        This function returns a DataFrame from USvisaData class input
         """
-        logging.info("Entered get_usvisa_input_dataframe method of USVisaData class")
+        try:
+            
+            usvisa_input_dict = self.get_usvisa_data_as_dict()
+            return DataFrame(usvisa_input_dict)
         
+        except Exception as e:
+            raise final_except(e, sys) from e
+
+
+    def get_usvisa_data_as_dict(self):
+        """
+        This function returns a dictionary from USvisaData class input 
+        """
+        logging.info("Entered get_usvisa_data_as_dict method as USvisaData class")
+
         try:
             input_data = {
                 "continent": [self.continent],
@@ -66,36 +77,30 @@ class USVisaData:
                 "company_age": [self.company_age],
             }
 
-            logging.info("Created USVisa data dictionary")
-            logging.info("Exited get_usvisa_input_dataframe method of USVisaData class")
+            logging.info("Created usvisa data dict")
 
-            return pd.DataFrame(input_data)
+            logging.info("Exited get_usvisa_data_as_dict method as USvisaData class")
+
+            return input_data
+
         except Exception as e:
             raise final_except(e, sys) from e
 
-
 class USvisaClassifier:
-    def __init__(self, prediction_pipeline_config: VisaPredictorConfig = VisaPredictorConfig()) -> None:
+    def __init__(self,prediction_pipeline_config: VisaPredictorConfig = VisaPredictorConfig(),) -> None:
         """
-        Initialize the USvisaClassifier with the prediction pipeline configuration.
-
-        Args:
-            prediction_pipeline_config (VisaPredictorConfig): Configuration for prediction.
+        :param prediction_pipeline_config: Configuration for prediction the value
         """
         try:
+            # self.schema_config = read_yaml_file(SCHEMA_FILE_PATH)
             self.prediction_pipeline_config = prediction_pipeline_config
         except Exception as e:
             raise final_except(e, sys)
 
-    def predict(self, dataframe: DataFrame) -> str:
+    def predict(self, dataframe) -> str:
         """
-        Perform predictions on the given DataFrame.
-
-        Args:
-            dataframe (DataFrame): Input data for predictions.
-
-        Returns:
-            str: Predictions as a string.
+        This is the method of USvisaClassifier
+        Returns: Prediction in string format
         """
         try:
             logging.info("Entered predict method of USvisaClassifier class")
@@ -103,7 +108,9 @@ class USvisaClassifier:
                 bucket_name=self.prediction_pipeline_config.model_bucket_name,
                 model_path=self.prediction_pipeline_config.model_file_path,
             )
-            result = model.predict(dataframe)
+            result =  model.predict(dataframe)
+            
             return result
+        
         except Exception as e:
             raise final_except(e, sys)
