@@ -3,7 +3,7 @@ import sys
 
 import numpy as np
 import pandas as pd
-from Primary_Folder.entity.config_entity import VisaPredictorConfig
+from Primary_Folder.entity.config_entity import USvisaPredictorConfig
 from Primary_Folder.entity.s3_estimator import USvisaEstimator
 from Primary_Folder.exceptions import final_except
 from Primary_Folder.logger import logging
@@ -11,7 +11,7 @@ from Primary_Folder.utils.main import read_yaml_file
 from pandas import DataFrame
 
 
-class USVisaData:
+class USvisaData:
     def __init__(self,
                 continent,
                 education_of_employee,
@@ -44,7 +44,7 @@ class USVisaData:
         except Exception as e:
             raise final_except(e, sys) from e
 
-    def get_usvisa_input_dataframe(self)-> DataFrame:
+    def get_usvisa_input_data_frame(self)-> DataFrame:
         """
         This function returns a DataFrame from USvisaData class input
         """
@@ -87,7 +87,7 @@ class USVisaData:
             raise final_except(e, sys) from e
 
 class USvisaClassifier:
-    def __init__(self,prediction_pipeline_config: VisaPredictorConfig = VisaPredictorConfig(),) -> None:
+    def __init__(self,prediction_pipeline_config: USvisaPredictorConfig = USvisaPredictorConfig(),) -> None:
         """
         :param prediction_pipeline_config: Configuration for prediction the value
         """

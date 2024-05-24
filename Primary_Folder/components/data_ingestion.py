@@ -1,24 +1,18 @@
 import os
 import sys
-
+import pandas as pd
 from pandas import DataFrame
 from sklearn.model_selection import train_test_split
-
 from Primary_Folder.entity.config_entity import DataIngestionConfig
 from Primary_Folder.entity.artifact_entity import DataIngestionArtifact
 from Primary_Folder.exceptions import final_except
 from Primary_Folder.logger import logging
-from Primary_Folder.database_access.db_extract import VisaData
-
+from Primary_Folder.database_access.db_extract import USvisaData
 
 class DataIngestion:
     def __init__(self, data_ingestion_config: DataIngestionConfig = DataIngestionConfig()):
         """
-        Initialize the DataIngestion class with a DataIngestionConfig.
-
-        Args:
-            data_ingestion_config (DataIngestionConfig, optional): Configuration for data ingestion.
-                Defaults to DataIngestionConfig().
+        :param data_ingestion_config: configuration for data ingestion
         """
         try:
             self.data_ingestion_config = data_ingestion_config
@@ -27,76 +21,84 @@ class DataIngestion:
 
     def export_data_into_feature_store(self) -> DataFrame:
         """
-        Export data from the database into the feature store.
-
-        Returns:
-            DataFrame: DataFrame containing exported data.
+        Method Name :   export_data_into_feature_store
+        Description :   This method exports data from mongodb to csv file
+        
+        Output      :   data is returned as artifact of data ingestion components
+        On Failure  :   Write an exception log and then raise an exception
         """
         try:
-            logging.info("Exporting data into feature store.")
-            visa_data = VisaData()
-            dataframe = visa_data.export_collection_as_df(
-                collection_name=self.data_ingestion_config.collection_name
-            )
-            logging.info(f'Shape of the dataframe: {dataframe.shape}')
-
+            logging.info(f"Exporting data from mongodb")
+            usvisa_data = USvisaData()
+            dataframe = usvisa_data.export_collection_as_dataframe(collection_name=self.data_ingestion_config.collection_name)
+            logging.info(f"Shape of dataframe: {dataframe.shape}")
             feature_store_file_path = self.data_ingestion_config.feature_store_file_path
             dir_path = os.path.dirname(feature_store_file_path)
             os.makedirs(dir_path, exist_ok=True)
-            logging.info(f"Saving exported data into feature store at: {feature_store_file_path}")
-
+            logging.info(f"Saving exported data into feature store file path: {feature_store_file_path}")
             dataframe.to_csv(feature_store_file_path, index=False, header=True)
             return dataframe
+
         except Exception as e:
             raise final_except(e, sys)
 
     def split_data_as_train_test(self, dataframe: DataFrame) -> None:
         """
-        Split the data into training and testing sets.
-
-        Args:
-            dataframe (DataFrame): DataFrame to split.
+        Method Name :   split_data_as_train_test
+        Description :   This method splits the dataframe into train set and test set based on split ratio 
+        
+        Output      :   Folder is created in s3 bucket
+        On Failure  :   Write an exception log and then raise an exception
         """
-        logging.info("Entered split_data_as_train_test method of DataIngestion Class.")
-        try:
-            train_set, test_set = train_test_split(
-                dataframe, test_size=self.data_ingestion_config.train_test_split_ratio
-            )
-            logging.info("Performed train-test split.")
-            logging.info("Exited split_data_as_train_test method of DataIngestion Class.")
+        logging.info("Entered split_data_as_train_test method of Data_Ingestion class")
 
+        try:
+            if dataframe.empty:
+                raise ValueError("The dataframe is empty. Please check the data loading process.")
+            
+            train_set, test_set = train_test_split(dataframe, test_size=self.data_ingestion_config.train_test_split_ratio)
+            logging.info("Performed train test split on the dataframe")
+            logging.info("Exited split_data_as_train_test method of Data_Ingestion class")
+            
             dir_path = os.path.dirname(self.data_ingestion_config.training_file_path)
             os.makedirs(dir_path, exist_ok=True)
-
-            logging.info("Exporting training and test files.")
+            
+            logging.info(f"Exporting train and test file path.")
             train_set.to_csv(self.data_ingestion_config.training_file_path, index=False, header=True)
             test_set.to_csv(self.data_ingestion_config.testing_file_path, index=False, header=True)
 
-            logging.info("Exported training and test files.")
+            logging.info(f"Exported train and test file path.")
         except Exception as e:
             raise final_except(e, sys) from e
 
     def initiate_data_ingestion(self) -> DataIngestionArtifact:
         """
-        Initiate the data ingestion component of the training pipeline.
-
-        Returns:
-            DataIngestionArtifact: Artifact containing paths to training and testing data.
+        Method Name :   initiate_data_ingestion
+        Description :   This method initiates the data ingestion components of training pipeline 
+        
+        Output      :   train set and test set are returned as the artifacts of data ingestion components
+        On Failure  :   Write an exception log and then raise an exception
         """
-        logging.info("Entered initiate_data_ingestion method of Data Ingestion Class.")
+        logging.info("Entered initiate_data_ingestion method of Data_Ingestion class")
+
         try:
             dataframe = self.export_data_into_feature_store()
-            logging.info("Got the data from database.")
+            logging.info("Got the data from mongodb")
+            
+            if dataframe.empty:
+                raise ValueError("The dataframe fetched from MongoDB is empty. Please check the data loading process.")
+            
             self.split_data_as_train_test(dataframe)
-            logging.info("Performed the train-test split.")
-            logging.info("Exited initiate_data_ingestion method.")
+            logging.info("Performed train test split on the dataset")
+
+            logging.info("Exited initiate_data_ingestion method of Data_Ingestion class")
 
             data_ingestion_artifact = DataIngestionArtifact(
                 trained_file_path=self.data_ingestion_config.training_file_path,
                 test_file_path=self.data_ingestion_config.testing_file_path
             )
-
-            logging.info(f'Data ingestion artifact: {data_ingestion_artifact}')
+            
+            logging.info(f"Data ingestion artifact: {data_ingestion_artifact}")
             return data_ingestion_artifact
         except Exception as e:
             raise final_except(e, sys) from e

@@ -1,13 +1,13 @@
 import boto3
 from Primary_Folder.configuration.aws_connection import S3Client
 from io import StringIO
-from typing import Union, List
-import os, sys
+from typing import Union,List
+import os,sys
 from Primary_Folder.logger import logging
 from mypy_boto3_s3.service_resource import Bucket
 from Primary_Folder.exceptions import final_except
 from botocore.exceptions import ClientError
-from pandas import DataFrame, read_csv
+from pandas import DataFrame,read_csv
 import pickle
 
 
@@ -18,21 +18,26 @@ class SimpleStorageService:
         self.s3_resource = s3_client.s3_resource
         self.s3_client = s3_client.s3_client
 
-    def s3_key_path_available(self, bucket_name, s3_key) -> bool:
+    def s3_key_path_available(self,bucket_name,s3_key)->bool:
         try:
             bucket = self.get_bucket(bucket_name)
             file_objects = [file_object for file_object in bucket.objects.filter(Prefix=s3_key)]
-            return len(file_objects) > 0
+            if len(file_objects) > 0:
+                return True
+            else:
+                return False
         except Exception as e:
-            raise final_except(e, sys)
+            raise final_except(e,sys)
+        
+        
 
     @staticmethod
     def read_object(object_name: str, decode: bool = True, make_readable: bool = False) -> Union[StringIO, str]:
         """
         Method Name :   read_object
-        Description :   This method reads the object_name object with the given options
+        Description :   This method reads the object_name object with kwargs
 
-        Output      :   The content of the object, either as a decoded string or a StringIO object
+        Output      :   The column name is renamed
         On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2
@@ -41,20 +46,16 @@ class SimpleStorageService:
         logging.info("Entered the read_object method of S3Operations class")
 
         try:
-            if isinstance(object_name, list):
-                raise TypeError("Expected object_name to be a string, but got a list.")
-
             func = (
                 lambda: object_name.get()["Body"].read().decode()
-                if decode
+                if decode is True
                 else object_name.get()["Body"].read()
             )
-            conv_func = lambda: StringIO(func()) if make_readable else func()
+            conv_func = lambda: StringIO(func()) if make_readable is True else func()
             logging.info("Exited the read_object method of S3Operations class")
             return conv_func()
 
         except Exception as e:
-            logging.error(f"Error in read_object method of S3Operations class: {e}")
             raise final_except(e, sys) from e
 
     def get_bucket(self, bucket_name: str) -> Bucket:
@@ -77,7 +78,7 @@ class SimpleStorageService:
         except Exception as e:
             raise final_except(e, sys) from e
 
-    def get_file_object(self, filename: str, bucket_name: str) -> Union[List[object], object]:
+    def get_file_object( self, filename: str, bucket_name: str) -> Union[List[object], object]:
         """
         Method Name :   get_file_object
         Description :   This method gets the file object from bucket_name bucket based on filename
@@ -158,7 +159,7 @@ class SimpleStorageService:
                 pass
             logging.info("Exited the create_folder method of S3Operations class")
 
-    def upload_file(self, from_filename: str, to_filename: str, bucket_name: str, remove: bool = True):
+    def upload_file(self, from_filename: str, to_filename: str,  bucket_name: str,  remove: bool = True):
         """
         Method Name :   upload_file
         Description :   This method uploads the from_filename file to bucket_name bucket with to_filename as bucket filename
@@ -184,9 +185,11 @@ class SimpleStorageService:
                 f"Uploaded {from_filename} file to {to_filename} file in {bucket_name} bucket"
             )
 
-            if remove:
+            if remove is True:
                 os.remove(from_filename)
+
                 logging.info(f"Remove is set to {remove}, deleted the file")
+
             else:
                 logging.info(f"Remove is set to {remove}, not deleted the file")
 
@@ -195,7 +198,7 @@ class SimpleStorageService:
         except Exception as e:
             raise final_except(e, sys) from e
 
-    def upload_df_as_csv(self, data_frame: DataFrame, local_filename: str, bucket_filename: str, bucket_name: str) -> None:
+    def upload_df_as_csv(self,data_frame: DataFrame,local_filename: str, bucket_filename: str,bucket_name: str,) -> None:
         """
         Method Name :   upload_df_as_csv
         Description :   This method uploads the dataframe to bucket_filename csv file in bucket_name bucket
@@ -210,7 +213,9 @@ class SimpleStorageService:
 
         try:
             data_frame.to_csv(local_filename, index=None, header=True)
+
             self.upload_file(local_filename, bucket_filename, bucket_name)
+
             logging.info("Exited the upload_df_as_csv method of S3Operations class")
 
         except Exception as e:
@@ -239,10 +244,10 @@ class SimpleStorageService:
 
     def read_csv(self, filename: str, bucket_name: str) -> DataFrame:
         """
-        Method Name :   read_csv
-        Description :   This method gets the dataframe from the filename object in the specified bucket
+        Method Name :   get_df_from_object
+        Description :   This method gets the dataframe from the object_name object
 
-        Output      :   DataFrame is returned based on the CSV file in S3
+        Output      :   Folder is created in s3 bucket
         On Failure  :   Write an exception log and then raise an exception
 
         Version     :   1.2

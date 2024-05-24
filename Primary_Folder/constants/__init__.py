@@ -5,7 +5,7 @@ DATABASE_NAME = "US_VISA"
 
 COLLECTION_NAME = "visa_data"
 
-MONGODB_URL_KEY = "MONGODB_URL"
+MONGODB_URL = "MONGODB_URL"
 
 PIPELINE_NAME: str = "usvisa"
 ARTIFACT_DIR: str = "artifact"
@@ -66,7 +66,7 @@ MODEL_TRAINER_MODEL_CONFIG_FILE_PATH: str = os.path.join("config", "model.yaml")
 
 
 MODEL_EVALUATION_CHANGED_THRESHOLD_SCORE: float = 0.02
-MODEL_BUCKET_NAME = "usvisa-model2024rsc"
+MODEL_BUCKET_NAME = "usvisa-model2024"
 MODEL_PUSHER_S3_KEY = "model-registry"
 
 

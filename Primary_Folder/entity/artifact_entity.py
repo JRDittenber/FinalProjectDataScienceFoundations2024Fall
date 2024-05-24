@@ -6,7 +6,7 @@ class DataIngestionArtifact:
     test_file_path: str
 
 @dataclass
-class DataValdiationArtifact:
+class DataValidationArtifact:
     validation_status: bool
     message: str
     drift_report_file_path: str
@@ -29,7 +29,7 @@ class ModelTrainerArtifact:
     metric_artifact: ClassificationMetricArtifact
 
 @dataclass
-class ModelEvalutationArtifact:
+class ModelEvaluationArtifact:
     is_model_accepted: bool
     changed_accuracy: float
     s3_model_path: str

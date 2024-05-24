@@ -1,6 +1,6 @@
 from Primary_Folder.cloud_storage.aws_storage import SimpleStorageService
 from Primary_Folder.exceptions import final_except
-from Primary_Folder.entity.estimator import USVisaModel  
+from Primary_Folder.entity.estimator import USvisaModel
 import sys
 from pandas import DataFrame
 
@@ -18,7 +18,7 @@ class USvisaEstimator:
         self.bucket_name = bucket_name
         self.s3 = SimpleStorageService()
         self.model_path = model_path
-        self.loaded_model:USVisaModel=None
+        self.loaded_model:USvisaModel=None
 
 
     def is_model_present(self,model_path):
@@ -28,7 +28,7 @@ class USvisaEstimator:
             print(e)
             return False
 
-    def load_model(self,)->USVisaModel:
+    def load_model(self,)->USvisaModel:
         """
         Load the model from the model_path
         :return:

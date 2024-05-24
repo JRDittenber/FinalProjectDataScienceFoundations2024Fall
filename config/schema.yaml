@@ -38,13 +38,13 @@ num_features:
   - prevailing_wage
   - company_age
 
-ordinal_columns:
+or_columns:
   - has_job_experience
   - requires_job_training
   - full_time_position
   - education_of_employee
 
-nominal_columns:
+oh_columns:
   - continent
   - unit_of_wage
   - region_of_employment

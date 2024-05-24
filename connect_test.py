@@ -30,3 +30,15 @@ class MongoDBClient:
         except Exception as e:
             logging.error(f"Error while connecting to MongoDB: {str(e)}")
             raise final_except(e, sys)
+
+
+
+
+
+
+if __name__ == "__main__":
+    try:
+        mongo_client = MongoDBClient()
+        print("MongoDB connection successful")
+    except Exception as e:
+        print(f"Error: {e}")
