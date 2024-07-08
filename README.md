@@ -152,4 +152,11 @@ Add the following secrets to enable AWS CLI commands and Docker operations:
 
 
 
-citation : project based on Bappy Ahmed - with MIT License
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Acknowledgements
+
+This project is based on the end-to-end deployment project created by Bappy Ahmed. Special thanks for making this available under the MIT License.
+
